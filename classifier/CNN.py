@@ -1,6 +1,7 @@
 import json
 import numpy as np
 from sklearn.model_selection import train_test_split
+import tensorflow as tf
 import tensorflow.keras as keras
 import os
 
@@ -88,9 +89,6 @@ def predict(model,X):
     return predictIndex
 
 
-
-
-
 def result(index):
     with open(DATA_PATH,"r") as fp:
         data=json.load(fp)
@@ -109,8 +107,8 @@ def classify():
     input_shape=(X_train.shape[1],X_train.shape[2],X_train.shape[3])
 
     #build the CNN network
-    # model=build_model(input_shape)
-    model = keras.models.load_model(os.path.dirname(os.path.realpath(__file__)))
+    model=build_model(input_shape)
+    # model = keras.models.load_model(os.path.dirname(os.path.realpath(__file__)))
 
     #compile the model
     optimizer=keras.optimizers.Adam(learning_rate=0.0001)
@@ -118,7 +116,20 @@ def classify():
                   loss="sparse_categorical_crossentropy",
                   metrics=['accuracy'])
     #train the model
-    model.fit(X_train,y_train,validation_data=(X_validation,y_validation),batch_size=32,epochs=30)
+    # model.fit(X_train,y_train,validation_data=(X_validation,y_validation),batch_size=32,epochs=30)
+
+    checkpoint_path = "training_1/cp.ckpt"
+    checkpoint_dir = os.path.dirname(checkpoint_path)
+
+    # Create a callback that saves the model's weights
+    # cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
+    #                                                 save_weights_only=True,
+    #                                                 verbose=1)
+
+    # # Train the model with the new callback
+    # model.fit(X_train,y_train,validation_data=(X_validation,y_validation),batch_size=32,epochs=40,callbacks=[cp_callback])
+
+    model.load_weights(checkpoint_path)
 
     #evluate CNN on test set
     test_error,test_accuracy=model.evaluate(X_test,y_test,verbose=1)
